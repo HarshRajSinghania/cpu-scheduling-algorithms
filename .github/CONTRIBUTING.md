@@ -1,38 +1,52 @@
 # Contributing
 
-Thanks for your interest in contributing! This is an educational project visualizing CPU scheduling algorithms.
+This is a learning tool for CPU scheduling, so readable code matters more than clever code.
 
-## Ways to contribute
-
-- **Bug reports** — open an issue using the bug report template.
-- **Feature requests** — open an issue using the feature request template.
-- **Pull requests** — small, focused PRs are easiest to review.
+I try to reply to issues within a few days.
 
 ## Development setup
 
-This is a static site — no build step required.
+It's a static site with no build step. Node is only needed for the tests and linters.
 
 ```bash
 git clone https://github.com/jayhemnani9910/cpu-scheduling-algorithms.git
 cd cpu-scheduling-algorithms
-# Open index.html in a browser, or serve locally:
+npm install
 python3 -m http.server 8000
 ```
 
-Then visit `http://localhost:8000`.
+Then open `http://localhost:8000`.
+
+## Checks
+
+CI runs all of these on every pull request:
+
+```bash
+npm test                 # algorithm tests against scheduler.js
+npm run lint             # eslint
+npm run format:check     # prettier
+npx htmlhint index.html  # HTML lint
+```
+
+Run `npm run format` to fix formatting.
 
 ## Code style
 
-- Match the existing style in `scheduler.js`, `script.js` and `style.css`. Run `npm run format` before committing.
-- Use 4-space indentation throughout, in JS, HTML and CSS, to match current files.
-- Keep algorithm logic readable — this is a learning tool.
+- Match the existing style in `scheduler.js`, `script.js` and `style.css`.
+- 4-space indentation in JS, HTML and CSS.
+- Keep scheduling logic in `scheduler.js` with no DOM code. The UI goes in `script.js`.
+- If you change algorithm logic, add or update a case in `tests/scheduler.test.js`.
 
-## Pull request checklist
+## Pull requests
 
-- [ ] Change is focused on a single issue/feature
-- [ ] Tested manually in a browser
-- [ ] `tests/scheduler.test.js` updated if algorithm logic changed, and `npm test` passes
-- [ ] README updated if user-facing behavior changed
+- Branch off `main` and open the PR against `main`.
+- One issue or feature per PR. Small PRs are easier to review.
+- Say what you tested in the browser.
+- Update the README if user-facing behavior changes.
+
+## Bug reports
+
+Open an issue with the bug report template. Include the algorithm, the processes you entered (arrival times and bursts), what you expected and what you got, and your browser. A screenshot of the result helps.
 
 ## Code of Conduct
 

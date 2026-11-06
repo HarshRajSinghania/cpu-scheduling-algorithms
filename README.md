@@ -1,130 +1,87 @@
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Open-2ea44f?style=for-the-badge)](https://jayhemnani9910.github.io/cpu-scheduling-algorithms/)
-[![CI](https://github.com/jayhemnani9910/cpu-scheduling-algorithms/actions/workflows/ci.yml/badge.svg)](https://github.com/jayhemnani9910/cpu-scheduling-algorithms/actions/workflows/ci.yml)
-[![Pages](https://github.com/jayhemnani9910/cpu-scheduling-algorithms/actions/workflows/pages.yml/badge.svg)](https://github.com/jayhemnani9910/cpu-scheduling-algorithms/actions/workflows/pages.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
 # CPU Scheduling Algorithms
 
-## Functionalities
+![Entering four processes, running Round Robin, then the time log and the algorithm comparison](docs/demo.gif)
 
-- 9 Algorithms are implemented.
-- Each process can have different number of CPU Burst Time and I/O Burst Time.
-- Gantt Chart and Timeline Chart for the given Schedule.
-- Context Switching Time.
-- Animation of the Time Log.
-- Comparison for Round Robin Algorithm for all time quantum.
-- Comparison between all the algorithms wrt Average Completion Time, Turn Around Time, Waiting Time and Response Time.
-
-### Different Criteria and Algorithms
-
-- The first process arrived in the ready queue is processed first.
-    - **First Come First Serve (FCFS)**
-        > Non-Preemptive
-- The shortest job in the ready queue is processed first.
-    - **Shortest Job First (SJF)**
-        > Non-Preemptive
-    - **Shortest Remaining Job First (SRTF)**
-        > Preemptive
-- The longest job in the ready queue is processed first.
-    - **Longest Job First (LJF)**
-        > Non-Preemptive
-    - **Longest Remaining Job First (LRTF)**
-        > Preemptive
-- The highest priority job in the ready queue is processed first.
-    - **Priority Non-Preemptive (PNP)**
-        > Non-Preemptive
-    - **Priority Preemptive(PP)**
-        > Preemptive
-- The jobs in the ready queue are given a fixed time quantum.
-    - **Round Robin (RR)**
-        > Preemptive
-- The job with the highest response ratio in the ready queue is processed first.
-    - **Highest Response Ratio Next (HRRN)**
-        > Non-Preemptive
-
-**Non-Preemptive:**
-Once a job enters the Running Queue, it will only leave when its required CPU Burst Time is completed or it requires an I/O Job.
-
-**Preemptive:**
-A job in the Running Queue can be removed (preempted) by another process with higher priority, better criteria, or equal criteria and a lower process ID, or when the time quantum ends.
-
-#### Different States in CPU Scheduler
-
-- Remain
-    > The processes which are yet to arrive.
-- Ready
-    > The processes which are ready to be executed.
-- Running
-    > Current Process Running in the CPU.
-- Block
-    > The processes which are blocked for I/O Time.
-- Terminate
-    > The processes which have completed all the CPU and I/O.
-
-### Technologies Used
-
-- HTML
-- CSS
-- Vanilla JS
-- Google Charts
-- Chart.js
-
-## Demo
-
-Try it live: **https://jayhemnani9910.github.io/cpu-scheduling-algorithms/**
-
-<!-- TODO: add a screenshot or GIF of the visualization at docs/screenshot.png and reference it here -->
-
-## Running Tests
+Enter processes and watch 9 CPU scheduling algorithms run them step by step, in the browser.
 
 ```bash
+git clone https://github.com/jayhemnani9910/cpu-scheduling-algorithms.git && cd cpu-scheduling-algorithms && python3 -m http.server 8000
+```
+
+Then open http://localhost:8000. Or use the live page: https://jayhemnani9910.github.io/cpu-scheduling-algorithms/
+
+[![CI](https://github.com/jayhemnani9910/cpu-scheduling-algorithms/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jayhemnani9910/cpu-scheduling-algorithms/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+## Usage
+
+1. Pick an algorithm. Set the time quantum for Round Robin, or the priority order for the priority algorithms.
+2. Set a context switch time if you want one. It defaults to 0.
+3. Add processes. Each one has an arrival time and a list of bursts: CPU, then IO, then CPU, and so on. Use `+ IO` to add an IO burst and a CPU burst.
+4. Press Calculate.
+
+You get:
+
+- Averages for turnaround, waiting, response and completion time, plus CPU utilization and throughput.
+- A Gantt chart, with context switches (CS) and idle time marked.
+- A timeline of when each process held the CPU.
+- A table of per-process times.
+- A time log you can play or step through. It shows each process moving between Not arrived, Ready, Running, Blocked (IO) and Done.
+- Round Robin averages for every time quantum up to the longest CPU burst.
+- The same processes run under all 9 algorithms, side by side.
+
+## Algorithms
+
+| Algorithm                            | Picks                            | Preemptive |
+| ------------------------------------ | -------------------------------- | ---------- |
+| First Come First Serve (FCFS)        | earliest arrival                 | no         |
+| Shortest Job First (SJF)             | shortest burst                   | no         |
+| Shortest Remaining Time First (SRTF) | shortest remaining burst         | yes        |
+| Longest Job First (LJF)              | longest burst                    | no         |
+| Longest Remaining Time First (LRTF)  | longest remaining burst          | yes        |
+| Priority Non-Preemptive (PNP)        | highest priority                 | no         |
+| Priority Preemptive (PP)             | highest priority                 | yes        |
+| Round Robin (RR)                     | next in queue, for a fixed slice | yes        |
+| Highest Response Ratio Next (HRRN)   | highest response ratio           | no         |
+
+A non-preemptive process keeps the CPU until its CPU burst ends or it goes to IO. A preemptive one can be pushed off by a better candidate, or by the end of its time quantum.
+
+Rules the engine follows:
+
+- Ties go to the lower process ID. In preemptive mode a tie preempts the running process.
+- Burst-based algorithms compare the total CPU burst time.
+- Waiting time is turnaround minus CPU time, so time spent in IO counts as waiting.
+- In preemptive mode the next process is chosen before the context switch starts.
+- No context switch is counted at the very start or the end.
+
+## How it works
+
+It's a static page with no build step. `scheduler.js` is the engine: all 9 algorithms and the state machine, with no DOM code. It steps time one unit at a time and records the schedule and a time log. `script.js` reads the form, runs the engine, and draws the results with Google Charts (Gantt and timeline) and Chart.js (the comparison charts). Both chart libraries load from a CDN.
+
+| File                      | Purpose                                                   |
+| ------------------------- | --------------------------------------------------------- |
+| `index.html`              | Layout, form inputs, chart containers                     |
+| `style.css`               | Styling                                                   |
+| `scheduler.js`            | Scheduling engine                                         |
+| `script.js`               | UI: form, tables, charts, time log                        |
+| `tests/scheduler.test.js` | Algorithm tests, run against `scheduler.js`               |
+| `browse.json`             | Click steps for a headless browser smoke test of the page |
+
+## Tests
+
+```bash
+npm install
 npm test
 ```
 
-All 9 algorithms have unit tests covering arrival ordering, preemption, tiebreaks, and edge
-cases. Read what that does and does not cover before relying on it:
+There are 23 tests. They load `scheduler.js`, the same file the page ships, and check completion, turnaround, waiting and response times, plus the context switch count in some cases. They cover all 9 algorithms, arrival order, preemption, ties and context switch time. No test uses an IO burst yet, and `script.js` has no unit tests.
 
-- The tests load `scheduler.js`, the same engine file the page ships, so a green run covers the
-  real scheduling code. DOM code in `script.js` is not unit tested; `browse.json` drives a
-  headless browser through the page instead.
-- No test uses a process with an I/O burst, and none sets a context switch time. Every case is
-  a single CPU burst with no switching cost.
-- `runTest` checks completion, turnaround, waiting and response times. It does not check the
-  schedule, the time log, or the context switch count.
-
-## Quick Start
-
-No build step — it's a static site.
-
-```bash
-git clone https://github.com/jayhemnani9910/cpu-scheduling-algorithms.git
-cd cpu-scheduling-algorithms
-# Open directly:
-open index.html
-# Or serve locally:
-python3 -m http.server 8000
-```
-
-## Architecture
-
-| File                      | Purpose                                                               |
-| ------------------------- | --------------------------------------------------------------------- |
-| `index.html`              | UI layout, form inputs, chart containers                              |
-| `style.css`               | Styling                                                               |
-| `scheduler.js`            | The scheduling engine: all 9 algorithms and the state machine, no DOM |
-| `script.js`               | UI: reads the form, runs the engine, renders tables and charts        |
-| `tests/scheduler.test.js` | Algorithm correctness tests, run against `scheduler.js`               |
-| `browse.json`             | Click steps for a headless browser smoke test of the page             |
-
-External dependencies (loaded via CDN in `index.html`):
-
-- [Google Charts](https://developers.google.com/chart) — Gantt and timeline charts
-- [Chart.js](https://www.chartjs.org/) — comparison bar charts
+`npm run lint`, `npm run format:check` and `npx htmlhint index.html` run in CI next to the tests.
 
 ## Contributing
 
-Contributions welcome! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) and the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) and the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
 ## License
 
-Released under the [MIT License](LICENSE).
+[MIT](LICENSE)
